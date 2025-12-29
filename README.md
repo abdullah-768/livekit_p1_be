@@ -92,6 +92,23 @@ In production, use the `start` command:
 pnpm run start
 ```
 
+## API Keys
+This starter project is pre-configured to use the following models through LiveKit Cloud:
+Assembly AI | Deepgram for SST
+OpenAI | Livekit for LLM
+Cartesia | Livekit for TTS
+
+Please obtain API keys for these services and add them to your `.env.local` file:
+- `ASSEMBLYAI_API_KEY`
+- `OPENAI_API_KEY`
+- `CARTESIA_API_KEY`
+- `DEEPGRAM_API_KEY`
+
+Cartesia key url: [Cartesia](https://play.cartesia.ai/keys)
+AssemblyAI key url: [AssemblyAI](https://www.assemblyai.com/dashboard/api-keys)
+OpenAI key url: [OpenAI](https://platform.openai.com/api-keys)
+Deepgram key url: [Deepgram](https://console.deepgram.com/signup)
+
 ## Frontend & Telephony
 
 Get started quickly with our pre-built frontend starter apps, or add telephony support:
