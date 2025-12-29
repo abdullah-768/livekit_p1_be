@@ -9,6 +9,10 @@ import {
   metrics,
   voice,
 } from '@livekit/agents';
+import * as cartesia from '@livekit/agents-plugin-cartesia';
+// import * as openai from '@livekit/agents-plugin-openai';
+// import * as assemblyai from '@livekit/agents-plugin-assemblyai';
+import * as deepgram from '@livekit/agents-plugin-deepgram';
 import * as livekit from '@livekit/agents-plugin-livekit';
 import * as silero from '@livekit/agents-plugin-silero';
 import { BackgroundVoiceCancellation } from '@livekit/noise-cancellation-node';
@@ -239,20 +243,35 @@ export default defineAgent({
     // Set up a voice AI pipeline using OpenAI, Cartesia, and the LiveKit turn detector
     const session = new voice.AgentSession({
       // Speech-to-text (STT) is your agent's ears, turning the user's speech into text that the LLM can understand
-      stt: new inference.STT({
-        // model: 'assemblyai/universal-streaming',
-        model: 'cartesia/ink-whisper',
-        language: 'en',
+      // stt: new inference.STT({
+      //   // model: 'assemblyai/universal-streaming',
+      //   model: 'cartesia/ink-whisper',
+      //   language: 'en',
+      // }),
+
+      stt: new deepgram.STT({
+        apiKey: process.env.DEEPGRAM_API_KEY!,
       }),
 
       // A Large Language Model (LLM) is your agent's brain, processing user input and generating a response
+      // llm: new openai.LLM({
+      //   apiKey: process.env.OPENAI_API_KEY!,
+      //   model: 'gpt-4.1-mini',
+      // }),
       llm: new inference.LLM({
         model: 'openai/gpt-4.1-mini',
       }),
 
       // Text-to-speech (TTS) is your agent's voice, turning the LLM's text into speech that the user can hear
-      tts: new inference.TTS({
-        model: 'cartesia/sonic-3',
+      // tts: new inference.TTS({
+      //   model: 'cartesia/sonic-3',
+      //   voice: '9626c31c-bec5-4cca-baa8-f8ba9e84c8bc',
+      //   language: 'en',
+      // }),
+
+      tts: new cartesia.TTS({
+        apiKey: process.env.CARTESIA_API_KEY!,
+        model: 'sonic-3',
         voice: '9626c31c-bec5-4cca-baa8-f8ba9e84c8bc',
         language: 'en',
       }),
@@ -271,6 +290,9 @@ export default defineAgent({
     session.on(voice.AgentSessionEventTypes.MetricsCollected, (ev) => {
       metrics.logMetrics(ev.metrics);
       usageCollector.collect(ev.metrics);
+    });
+    session.on(voice.AgentSessionEventTypes.UserInputTranscribed, async (ev) => {
+      console.log('User said:', ev.transcript);
     });
 
     const logUsage = async () => {
