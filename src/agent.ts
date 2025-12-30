@@ -318,6 +318,22 @@ export default defineAgent({
       voiceOptions: {
         // Allow the LLM to generate a response while waiting for the end of turn
         preemptiveGeneration: true,
+        // Allow interruptions but make it harder to trigger them
+        allowInterruptions: true,
+        // Don't discard audio if agent can't be interrupted
+        discardAudioIfUninterruptible: false,
+        // Require longer audio duration before allowing interruption (in seconds)
+        // Increased from default to reduce sensitivity to brief mic disruptions
+        minInterruptionDuration: 1.2,
+        // Require more words to be detected before triggering an interruption
+        // This prevents brief noises/words from stopping the agent mid-speech
+        minInterruptionWords: 5,
+        // Minimum delay before considering user's speech has ended
+        minEndpointingDelay: 0.6,
+        // Maximum time to wait for user's speech to end
+        maxEndpointingDelay: 3.0,
+        // Maximum number of tool calls in a single turn
+        maxToolSteps: 10,
       },
     });
 
@@ -350,7 +366,7 @@ export default defineAgent({
         // noiseCancellation: TelephonyBackgroundVoiceCancellation(),
       },
     });
-    await session.say(`Hello ${process.env.USER_NAME}! I'm ${process.env.AGENT_NAME},your study buddy for today. Let's learn about cells together!`);
+    await session.say(`Hello ${process.env.USER_NAME}! I'm ${process.env.AGENT_NAME}, your study buddy for today. Let's learn about cells together!`);
 
     // Join the room and connect to the user
     await ctx.connect();
