@@ -20,7 +20,7 @@ import axios from 'axios';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
-
+import { readFile } from 'node:fs/promises';
 dotenv.config({ path: '.env.local' });
 
 // interface VariableTemplaterOptions {
@@ -123,7 +123,8 @@ You are ${agentName}, a friendly seventh-grade student at the Veritas Learning C
 
 # Conversational Flow (Proactive Peer)
 - Start by inviting ${userName} to talk about cells.
-- Use your tools silently to get info on cell summaries, plant cells, and animal cells.
+- Use your tools silently to get info on cell topic.
+- Start from the basics of the topic and build up gradually.
 - Share a "cool fact" from your study notes and ask ${userName} what they think or if they knew that already.
 - If ${userName} says something wrong, don't say "you are incorrect." Instead, say: "Wait, ${userName}, I think my notes say it is actually [correct info]. Does that sound right to you?"
 - Move through the topic in tiny steps. Confirm ${userName} is ready before moving to the next part.
@@ -140,36 +141,51 @@ You are ${agentName}, a friendly seventh-grade student at the Veritas Learning C
 - Stay focused on cells. If ${userName} gets off track, say you really want to pass this science test together.`),
 
       tools: {
-        getLessonSummary: llm.tool({
-          description: 'Fetch cells lesson summary from the national academy api',
-          parameters: z.object({
-            lesson: z.string().describe('The lesson ID'),
-          }),
-          execute: async ({ lesson }) => {
-            return this.getLessonSummary(lesson);
-          },
-        }),
-        getLessonQuiz: llm.tool({
-          description: 'Get quiz from oak',
-          parameters: z.object({
-            lesson: z.string().describe('The lesson ID'),
-          }),
-          execute: async ({ lesson }) => {
-            return this.getLessonQuiz(lesson);
-          },
-        }),
-        getPlantCellsSummary: llm.tool({
-          description: 'Oak plant cells summary api',
+        // getLessonSummary: llm.tool({
+        //   description: 'Fetch cells lesson summary from the national academy api',
+        //   parameters: z.object({
+        //     lesson: z.string().describe('The lesson ID'),
+        //   }),
+        //   execute: async ({ lesson }) => {
+        //     return this.getLessonSummary(lesson);
+        //   },
+        // }),
+        // getLessonQuiz: llm.tool({
+        //   description: 'Get quiz from oak',
+        //   parameters: z.object({
+        //     lesson: z.string().describe('The lesson ID'),
+        //   }),
+        //   execute: async ({ lesson }) => {
+        //     return this.getLessonQuiz(lesson);
+        //   },
+        // }),
+        // getPlantCellsSummary: llm.tool({
+        //   description: 'Oak plant cells summary api',
+        //   parameters: z.object({}),
+        //   execute: async () => {
+        //     return this.getPlantCellsSummary();
+        //   },
+        // }),
+        // getAnimalCellsSummary: llm.tool({
+        //   description: 'Oak animal cells api',
+        //   parameters: z.object({}),
+        //   execute: async () => {
+        //     return this.getAnimalCellsSummary();
+        //   },
+        // }),
+        getCells: llm.tool({
+          description: 'Fetch cells topic from document',
           parameters: z.object({}),
           execute: async () => {
-            return this.getPlantCellsSummary();
+            return this.readCellsDocument();
           },
         }),
-        getAnimalCellsSummary: llm.tool({
-          description: 'Oak animal cells api',
+
+        getQuiz: llm.tool({
+          description: 'Get quiz questions from document and select any 10 questions and ask the user',
           parameters: z.object({}),
           execute: async () => {
-            return this.getAnimalCellsSummary();
+            return this.readCellsQuizDocument();
           },
         }),
       },
@@ -196,42 +212,61 @@ You are ${agentName}, a friendly seventh-grade student at the Veritas Learning C
     }
   }
 
-  private async getLessonSummary(lesson: string): Promise<string> {
-    const url = `https://open-api.thenational.academy/api/v0/lessons/${encodeURIComponent(lesson)}/summary`;
-    const headers = {
-      Authorization: this.headersTemplater.render('Bearer {{secrets.OAK_API_SECRET_KEY}}'),
-    };
+  // private async getLessonSummary(lesson: string): Promise<string> {
+  //   const url = `https://open-api.thenational.academy/api/v0/lessons/${encodeURIComponent(lesson)}/summary`;
+  //   const headers = {
+  //     Authorization: this.headersTemplater.render('Bearer {{secrets.OAK_API_SECRET_KEY}}'),
+  //   };
 
-    return this.makeRequest(url, headers);
+  //   return this.makeRequest(url, headers);
+  // }
+
+  // private async getLessonQuiz(lesson: string): Promise<string> {
+  //   const url = `https://open-api.thenational.academy/api/v0/lessons/${encodeURIComponent(lesson)}/quiz`;
+  //   const headers = {
+  //     Authorization: this.headersTemplater.render('Bearer {{secrets.OAK_API_SECRET_KEY}}'),
+  //   };
+
+  //   return this.makeRequest(url, headers);
+  // }
+
+  // private async getPlantCellsSummary(): Promise<string> {
+  //   const url =
+  //     'https://open-api.thenational.academy/api/v0/lessons/plant-cell-structures-and-their-functions/summary';
+  //   const headers = {
+  //     Authorization: this.headersTemplater.render('Bearer {{secrets.OAK_API_SECRET_KEY}}'),
+  //   };
+
+  //   return this.makeRequest(url, headers);
+  // }
+
+  // private async getAnimalCellsSummary(): Promise<string> {
+  //   const url =
+  //     'https://open-api.thenational.academy/api/v0/lessons/animal-cell-structures-and-their-functions/summary';
+  //   const headers = {
+  //     Authorization: this.headersTemplater.render('Bearer {{secrets.OAK_API_SECRET_KEY}}'),
+  //   };
+
+  //   return this.makeRequest(url, headers);
+  // }
+  private async readCellsDocument(): Promise<string> {
+    const filePath = this.templater.render('cells.txt');
+    try {
+      const content = await readFile(filePath, 'utf-8');
+      return content;
+    } catch (error) {
+      throw new Error(`error reading document: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 
-  private async getLessonQuiz(lesson: string): Promise<string> {
-    const url = `https://open-api.thenational.academy/api/v0/lessons/${encodeURIComponent(lesson)}/quiz`;
-    const headers = {
-      Authorization: this.headersTemplater.render('Bearer {{secrets.OAK_API_SECRET_KEY}}'),
-    };
-
-    return this.makeRequest(url, headers);
-  }
-
-  private async getPlantCellsSummary(): Promise<string> {
-    const url =
-      'https://open-api.thenational.academy/api/v0/lessons/plant-cell-structures-and-their-functions/summary';
-    const headers = {
-      Authorization: this.headersTemplater.render('Bearer {{secrets.OAK_API_SECRET_KEY}}'),
-    };
-
-    return this.makeRequest(url, headers);
-  }
-
-  private async getAnimalCellsSummary(): Promise<string> {
-    const url =
-      'https://open-api.thenational.academy/api/v0/lessons/animal-cell-structures-and-their-functions/summary';
-    const headers = {
-      Authorization: this.headersTemplater.render('Bearer {{secrets.OAK_API_SECRET_KEY}}'),
-    };
-
-    return this.makeRequest(url, headers);
+  private async readCellsQuizDocument(): Promise<string> {
+    const filePath = this.templater.render('quiz.txt');
+    try {
+      const content = await readFile(filePath, 'utf-8');
+      return content;
+    } catch (error) {
+      throw new Error(`error reading document: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 }
 
@@ -251,6 +286,7 @@ export default defineAgent({
 
       stt: new deepgram.STT({
         apiKey: process.env.DEEPGRAM_API_KEY!,
+        profanityFilter: true,
       }),
 
       // A Large Language Model (LLM) is your agent's brain, processing user input and generating a response
@@ -311,8 +347,10 @@ export default defineAgent({
         // - If self-hosting, omit this parameter
         // - For telephony applications, use `BackgroundVoiceCancellationTelephony` for best results
         noiseCancellation: BackgroundVoiceCancellation(),
+        // noiseCancellation: TelephonyBackgroundVoiceCancellation(),
       },
     });
+    await session.say(`Hello ${process.env.USER_NAME}! I'm ${process.env.AGENT_NAME},your study buddy for today. Let's learn about cells together!`);
 
     // Join the room and connect to the user
     await ctx.connect();
