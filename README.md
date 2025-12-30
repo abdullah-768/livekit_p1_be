@@ -104,9 +104,9 @@ Please obtain API keys for these services and add them to your `.env.local` file
 - `CARTESIA_API_KEY`
 - `DEEPGRAM_API_KEY`
 
-Cartesia key url: [Cartesia](https://play.cartesia.ai/keys)
-AssemblyAI key url: [AssemblyAI](https://www.assemblyai.com/dashboard/api-keys)
-OpenAI key url: [OpenAI](https://platform.openai.com/api-keys)
+Cartesia key url: [Cartesia](https://play.cartesia.ai/keys) <br>
+AssemblyAI key url: [AssemblyAI](https://www.assemblyai.com/dashboard/api-keys) <br>
+OpenAI key url: [OpenAI](https://platform.openai.com/api-keys) <br>
 Deepgram key url: [Deepgram](https://console.deepgram.com/signup)
 
 ## Frontend & Telephony
