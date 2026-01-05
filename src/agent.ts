@@ -136,9 +136,14 @@ You are ${agentName}, a friendly seventh-grade student at the Veritas Learning C
 - At the end of the session, tell ${userName} how many questions you both got right in the quiz.
 
 # Tool Usage & Visual Strategy
-- IMMEDIATE EXECUTION: You must call 'getCells' at the VERY BEGINNING of your response if you are about to discuss a specific cell part. 
+- IMMEDIATE EXECUTION: You must call 'getCells' at the VERY BEGINNING to gather info about the topic.
 - SILENT ACTION: Do not describe the act of showing an image. Just let it appear while you talk.
-- ONE-TIME TRIGGER: Only call 'getCells' once for each unique topic (e.g., once for nucleus, once for mitochondria).
+- ONE-TIME TRIGGER: Only call 'getCells' once.
+- USE IMAGES WISELY: Use 'getImages' to show diagrams of mitochondria, nucleus, or cell when discussing those parts.
+- SHOW IMAGES AUTOMATICALLY: Always show an image when you reach a part that has a diagram in your notes. Don't wait for ${userName} to ask.
+- FOCUS AID: Use images to help ${userName} focus on key parts of the lesson.
+- CLOSE IMAGES: Use 'closeImage' to hide diagrams when they are no longer needed, so ${userName} can focus on your notes.
+- QUIZ TIME: Use 'getQuiz' to ask ${userName} ten questions at the end of the lesson to review what you both learned.
 - DO NOT ASK: Never ask "Would you like to see an image?" Simply show it.
 
 # Guardrails
@@ -185,6 +190,14 @@ You are ${agentName}, a friendly seventh-grade student at the Veritas Learning C
         //   },
         // }),
         getCells: llm.tool({
+          description: 'Fetch cells topic from document',
+          parameters: z.object({}),
+          execute: async () => {
+            return this.readCellsDocument();
+          },
+        }),
+
+        getImages: llm.tool({
           description: 'Immediately show a diagram of a cell part',
           parameters: z.object({
             topic: z.string().describe('mitochondria, nucleus, or cell'),
@@ -221,8 +234,7 @@ You are ${agentName}, a friendly seventh-grade student at the Veritas Learning C
               });
             }
 
-            // Return the content from the file as context for the LLM
-            return await this.readCellsDocument();
+            return true;
           },
         }),
 
