@@ -357,8 +357,9 @@ export default defineAgent({
       // }),
       tts: new elevenlabs.TTS({
         apiKey: process.env.ELEVEN_API_KEY!,
-        voiceId: 'gJx1vCzNCD1EQHT212Ls',
-        language: 'en-US',
+        enableLogging: true,
+        voiceId: process.env.ELEVEN_VOICE_ID!,
+        language: 'en',
         model: 'eleven_flash_v2_5',
       }),
       turnDetection: new livekit.turnDetector.MultilingualModel(),
