@@ -347,13 +347,41 @@ export default defineAgent({
     proc.userData.vad = await silero.VAD.load();
   },
   entry: async (ctx: JobContext) => {
+    // Set up a voice AI pipeline using OpenAI, Cartesia, and the LiveKit turn detector
     const session = new voice.AgentSession({
-      stt: new deepgram.STT({ apiKey: process.env.DEEPGRAM_API_KEY! }),
-      llm: new inference.LLM({ model: 'openai/gpt-4o-mini' }), // Use 4o-mini for better tool calling
+      // Speech-to-text (STT) is your agent's ears, turning the user's speech into text that the LLM can understand
+      // stt: new inference.STT({
+      //   // model: 'assemblyai/universal-streaming',
+      //   model: 'cartesia/ink-whisper',
+      //   language: 'en',
+      // }),
+
+      stt: new deepgram.STT({
+        apiKey: process.env.DEEPGRAM_API_KEY!,
+        profanityFilter: true,
+      }),
+
+      // A Large Language Model (LLM) is your agent's brain, processing user input and generating a response
+      // llm: new openai.LLM({
+      //   apiKey: process.env.OPENAI_API_KEY!,
+      //   model: 'gpt-4.1-mini',
+      // }),
+      llm: new inference.LLM({
+        model: 'openai/gpt-4o-mini',
+      }),
+
+      // Text-to-speech (TTS) is your agent's voice, turning the LLM's text into speech that the user can hear
+      // tts: new inference.TTS({
+      //   model: 'cartesia/sonic-3',
+      //   voice: '9626c31c-bec5-4cca-baa8-f8ba9e84c8bc',
+      //   language: 'en',
+      // }),
+
       // tts: new cartesia.TTS({
       //   apiKey: process.env.CARTESIA_API_KEY!,
       //   model: 'sonic-3',
       //   voice: '9626c31c-bec5-4cca-baa8-f8ba9e84c8bc',
+      //   language: 'en',
       // }),
       tts: new elevenlabs.TTS({
         apiKey: process.env.ELEVEN_API_KEY!,
@@ -362,11 +390,32 @@ export default defineAgent({
         language: 'en',
         model: 'eleven_flash_v2_5',
       }),
+
+      // VAD and turn detection are used to determine when the user is speaking and when the agent should respond
       turnDetection: new livekit.turnDetector.MultilingualModel(),
       vad: ctx.proc.userData.vad! as silero.VAD,
+      voiceOptions: {
+        // Allow the LLM to generate a response while waiting for the end of turn
+        preemptiveGeneration: true,
+        // Allow interruptions but make it harder to trigger them
+        allowInterruptions: true,
+        // Don't discard audio if agent can't be interrupted
+        discardAudioIfUninterruptible: false,
+        // Require longer audio duration before allowing interruption (in seconds)
+        // Increased from default to reduce sensitivity to brief mic disruptions
+        minInterruptionDuration: 1.2,
+        // Require more words to be detected before triggering an interruption
+        // This prevents brief noises/words from stopping the agent mid-speech
+        minInterruptionWords: 5,
+        // Minimum delay before considering user's speech has ended
+        minEndpointingDelay: 0.6,
+        // Maximum time to wait for user's speech to end
+        maxEndpointingDelay: 3.0,
+        // Maximum number of tool calls in a single turn
+        maxToolSteps: 10,
+      },
     });
 
-    // CRITICAL FIX: Pass ctx.room to the DefaultAgent constructor
     const agentInstance = new DefaultAgent(ctx.job.metadata ?? '{}', ctx.room);
     // Metrics collection, to measure pipeline performance
     const usageCollector = new metrics.UsageCollector();
@@ -377,6 +426,15 @@ export default defineAgent({
     session.on(voice.AgentSessionEventTypes.UserInputTranscribed, async (ev) => {
       console.log('User said:', ev.transcript);
     });
+
+    const logUsage = async () => {
+      const summary = usageCollector.getSummary();
+      console.log(`Usage: ${JSON.stringify(summary)}`);
+    };
+
+    ctx.addShutdownCallback(logUsage);
+
+    // Start the session, which initializes the voice pipeline and warms up the models
     await session.start({
       agent: agentInstance,
       room: ctx.room,
@@ -388,117 +446,13 @@ export default defineAgent({
         // noiseCancellation: TelephonyBackgroundVoiceCancellation(),
       },
     });
-
     await session.say(
-      `Hello ${process.env.USER_NAME}! I'm ${process.env.AGENT_NAME}. Let's study cells!`,
+      `Hello ${process.env.USER_NAME}! I'm ${process.env.AGENT_NAME}, your study buddy for today. Let's learn about cells together!`,
     );
+
+    // Join the room and connect to the user
     await ctx.connect();
   },
 });
 
 cli.runApp(new ServerOptions({ agent: fileURLToPath(import.meta.url) }));
-
-// export default defineAgent({
-//   prewarm: async (proc: JobProcess) => {
-//     proc.userData.vad = await silero.VAD.load();
-//   },
-//   entry: async (ctx: JobContext) => {
-//     // Set up a voice AI pipeline using OpenAI, Cartesia, and the LiveKit turn detector
-//     const session = new voice.AgentSession({
-//       // Speech-to-text (STT) is your agent's ears, turning the user's speech into text that the LLM can understand
-//       // stt: new inference.STT({
-//       //   // model: 'assemblyai/universal-streaming',
-//       //   model: 'cartesia/ink-whisper',
-//       //   language: 'en',
-//       // }),
-
-//       stt: new deepgram.STT({
-//         apiKey: process.env.DEEPGRAM_API_KEY!,
-//         profanityFilter: true,
-//       }),
-
-//       // A Large Language Model (LLM) is your agent's brain, processing user input and generating a response
-//       // llm: new openai.LLM({
-//       //   apiKey: process.env.OPENAI_API_KEY!,
-//       //   model: 'gpt-4.1-mini',
-//       // }),
-//       llm: new inference.LLM({
-//         model: 'openai/gpt-4.1-mini',
-//       }),
-
-//       // Text-to-speech (TTS) is your agent's voice, turning the LLM's text into speech that the user can hear
-//       // tts: new inference.TTS({
-//       //   model: 'cartesia/sonic-3',
-//       //   voice: '9626c31c-bec5-4cca-baa8-f8ba9e84c8bc',
-//       //   language: 'en',
-//       // }),
-
-//       tts: new cartesia.TTS({
-//         apiKey: process.env.CARTESIA_API_KEY!,
-//         model: 'sonic-3',
-//         voice: '9626c31c-bec5-4cca-baa8-f8ba9e84c8bc',
-//         language: 'en',
-//       }),
-
-//       // VAD and turn detection are used to determine when the user is speaking and when the agent should respond
-//       turnDetection: new livekit.turnDetector.MultilingualModel(),
-//       vad: ctx.proc.userData.vad! as silero.VAD,
-//       voiceOptions: {
-//         // Allow the LLM to generate a response while waiting for the end of turn
-//         preemptiveGeneration: true,
-//         // Allow interruptions but make it harder to trigger them
-//         allowInterruptions: true,
-//         // Don't discard audio if agent can't be interrupted
-//         discardAudioIfUninterruptible: false,
-//         // Require longer audio duration before allowing interruption (in seconds)
-//         // Increased from default to reduce sensitivity to brief mic disruptions
-//         minInterruptionDuration: 1.2,
-//         // Require more words to be detected before triggering an interruption
-//         // This prevents brief noises/words from stopping the agent mid-speech
-//         minInterruptionWords: 5,
-//         // Minimum delay before considering user's speech has ended
-//         minEndpointingDelay: 0.6,
-//         // Maximum time to wait for user's speech to end
-//         maxEndpointingDelay: 3.0,
-//         // Maximum number of tool calls in a single turn
-//         maxToolSteps: 10,
-//       },
-//     });
-
-//     // Metrics collection, to measure pipeline performance
-//     const usageCollector = new metrics.UsageCollector();
-//     session.on(voice.AgentSessionEventTypes.MetricsCollected, (ev) => {
-//       metrics.logMetrics(ev.metrics);
-//       usageCollector.collect(ev.metrics);
-//     });
-//     session.on(voice.AgentSessionEventTypes.UserInputTranscribed, async (ev) => {
-//       console.log('User said:', ev.transcript);
-//     });
-
-//     const logUsage = async () => {
-//       const summary = usageCollector.getSummary();
-//       console.log(`Usage: ${JSON.stringify(summary)}`);
-//     };
-
-//     ctx.addShutdownCallback(logUsage);
-
-//     // Start the session, which initializes the voice pipeline and warms up the models
-//     await session.start({
-//       agent: new DefaultAgent(ctx.job.metadata ?? '{}'),
-//       room: ctx.room,
-//       inputOptions: {
-//         // LiveKit Cloud enhanced noise cancellation
-//         // - If self-hosting, omit this parameter
-//         // - For telephony applications, use `BackgroundVoiceCancellationTelephony` for best results
-//         noiseCancellation: BackgroundVoiceCancellation(),
-//         // noiseCancellation: TelephonyBackgroundVoiceCancellation(),
-//       },
-//     });
-//     await session.say(`Hello ${process.env.USER_NAME}! I'm ${process.env.AGENT_NAME}, your study buddy for today. Let's learn about cells together!`);
-
-//     // Join the room and connect to the user
-//     await ctx.connect();
-//   },
-// });
-
-// cli.runApp(new ServerOptions({ agent: fileURLToPath(import.meta.url) }));
