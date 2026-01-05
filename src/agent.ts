@@ -9,12 +9,13 @@ import {
   metrics,
   voice,
 } from '@livekit/agents';
-import * as cartesia from '@livekit/agents-plugin-cartesia';
+// import * as cartesia from '@livekit/agents-plugin-cartesia';
 // import * as openai from '@livekit/agents-plugin-openai';
 // import * as assemblyai from '@livekit/agents-plugin-assemblyai';
 import * as deepgram from '@livekit/agents-plugin-deepgram';
 import * as livekit from '@livekit/agents-plugin-livekit';
 import * as silero from '@livekit/agents-plugin-silero';
+import * as elevenlabs from '@livekit/agents-plugin-elevenlabs';
 import { BackgroundVoiceCancellation } from '@livekit/noise-cancellation-node';
 import axios from 'axios';
 import dotenv from 'dotenv';
@@ -344,10 +345,16 @@ export default defineAgent({
     const session = new voice.AgentSession({
       stt: new deepgram.STT({ apiKey: process.env.DEEPGRAM_API_KEY! }),
       llm: new inference.LLM({ model: 'openai/gpt-4o-mini' }), // Use 4o-mini for better tool calling
-      tts: new cartesia.TTS({
-        apiKey: process.env.CARTESIA_API_KEY!,
-        model: 'sonic-3',
-        voice: '9626c31c-bec5-4cca-baa8-f8ba9e84c8bc',
+      // tts: new cartesia.TTS({
+      //   apiKey: process.env.CARTESIA_API_KEY!,
+      //   model: 'sonic-3',
+      //   voice: '9626c31c-bec5-4cca-baa8-f8ba9e84c8bc',
+      // }),
+      tts: new elevenlabs.TTS({
+        apiKey: process.env.ELEVEN_API_KEY!,
+        voiceId: 'gJx1vCzNCD1EQHT212Ls',
+        language: 'en-US',
+        model: 'eleven_flash_v2_5',
       }),
       turnDetection: new livekit.turnDetector.MultilingualModel(),
       vad: ctx.proc.userData.vad! as silero.VAD,
