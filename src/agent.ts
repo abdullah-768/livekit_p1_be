@@ -367,7 +367,7 @@ export default defineAgent({
       //   model: 'gpt-4.1-mini',
       // }),
       llm: new inference.LLM({
-        model: 'openai/gpt-4o-mini',
+        model: 'openai/gpt-4.1-mini',
       }),
 
       // Text-to-speech (TTS) is your agent's voice, turning the LLM's text into speech that the user can hear
