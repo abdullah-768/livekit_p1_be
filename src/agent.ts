@@ -18,9 +18,10 @@ import * as silero from '@livekit/agents-plugin-silero';
 import { BackgroundVoiceCancellation } from '@livekit/noise-cancellation-node';
 import axios from 'axios';
 import dotenv from 'dotenv';
+import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
-import { readFile } from 'node:fs/promises';
+
 dotenv.config({ path: '.env.local' });
 
 // interface VariableTemplaterOptions {
@@ -182,7 +183,8 @@ You are ${agentName}, a friendly seventh-grade student at the Veritas Learning C
         }),
 
         getQuiz: llm.tool({
-          description: 'Get quiz questions from document and select any 10 questions and ask the user',
+          description:
+            'Get quiz questions from document and select any 10 questions and ask the user',
           parameters: z.object({}),
           execute: async () => {
             return this.readCellsQuizDocument();
@@ -255,7 +257,9 @@ You are ${agentName}, a friendly seventh-grade student at the Veritas Learning C
       const content = await readFile(filePath, 'utf-8');
       return content;
     } catch (error) {
-      throw new Error(`error reading document: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `error reading document: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -265,7 +269,9 @@ You are ${agentName}, a friendly seventh-grade student at the Veritas Learning C
       const content = await readFile(filePath, 'utf-8');
       return content;
     } catch (error) {
-      throw new Error(`error reading document: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `error reading document: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 }
@@ -366,7 +372,9 @@ export default defineAgent({
         // noiseCancellation: TelephonyBackgroundVoiceCancellation(),
       },
     });
-    await session.say(`Hello ${process.env.USER_NAME}! I'm ${process.env.AGENT_NAME}, your study buddy for today. Let's learn about cells together!`);
+    await session.say(
+      `Hello ${process.env.USER_NAME}! I'm ${process.env.AGENT_NAME}, your study buddy for today. Let's learn about cells together!`,
+    );
 
     // Join the room and connect to the user
     await ctx.connect();
