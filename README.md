@@ -93,21 +93,77 @@ pnpm run start
 ```
 
 ## API Keys
-This starter project is pre-configured to use the following models through LiveKit Cloud:
-Assembly AI | Deepgram for SST
-OpenAI | Livekit for LLM
-Cartesia | Livekit for TTS
 
-Please obtain API keys for these services and add them to your `.env.local` file:
-- `ASSEMBLYAI_API_KEY`
-- `OPENAI_API_KEY`
-- `CARTESIA_API_KEY`
-- `DEEPGRAM_API_KEY`
+This project uses the following services. Please obtain API keys and add them to your `.env.local` file:
 
-Cartesia key url: [Cartesia](https://play.cartesia.ai/keys) <br>
-AssemblyAI key url: [AssemblyAI](https://www.assemblyai.com/dashboard/api-keys) <br>
-OpenAI key url: [OpenAI](https://platform.openai.com/api-keys) <br>
-Deepgram key url: [Deepgram](https://console.deepgram.com/signup)
+### Required Services
+
+| Service | Purpose | Environment Variables | Get Your Key |
+|---------|---------|----------------------|--------------|
+| **LiveKit Cloud** | Real-time infrastructure | `LIVEKIT_URL`<br>`LIVEKIT_API_KEY`<br>`LIVEKIT_API_SECRET` | [LiveKit Cloud](https://cloud.livekit.io/) |
+| **Deepgram** | Speech-to-Text (STT) | `DEEPGRAM_API_KEY` | [Get API Key](https://console.deepgram.com/signup) |
+| **OpenAI** | Large Language Model (LLM) | `OPENAI_API_KEY` | [Get API Key](https://platform.openai.com/api-keys) |
+| **ElevenLabs** | Text-to-Speech (TTS) | `ELEVEN_API_KEY`<br>`ELEVEN_VOICE_ID` | [Get API Key](https://elevenlabs.io/app/settings/api-keys) |
+
+### Alternative TTS Options (Optional)
+
+You can also use these TTS providers instead of ElevenLabs:
+
+| Provider | Environment Variable | Get Your Key |
+|----------|---------------------|--------------|
+| **Cartesia** | `CARTESIA_API_KEY` | [Get API Key](https://play.cartesia.ai/keys) |
+
+### Alternative STT Options (Optional)
+
+You can also use AssemblyAI for speech-to-text:
+
+| Provider | Environment Variable | Get Your Key |
+|----------|---------------------|--------------|
+| **AssemblyAI** | `ASSEMBLYAI_API_KEY` | [Get API Key](https://www.assemblyai.com/dashboard/api-keys) |
+
+### Configuration Notes
+
+**Agent Customization:**
+- `USER_NAME`: The name of the student (default: "Student")
+- `AGENT_NAME`: The name of your AI study buddy (default: "StudyBuddy")
+
+### Getting ElevenLabs Voice ID
+
+1. Go to [ElevenLabs Voice Library](https://elevenlabs.io/app/voice-library)
+2. Choose a voice or create a custom voice
+3. Click on the voice to see its details
+4. Copy the **Voice ID** from the voice settings
+5. Add it to your `.env.local` as `ELEVEN_VOICE_ID`
+
+Alternatively, you can use the ElevenLabs API to list available voices:
+
+```bash
+curl -X GET "https://api.elevenlabs.io/v1/voices" \
+  -H "xi-api-key: YOUR_ELEVEN_API_KEY"
+```
+
+### Example `.env.local` file
+
+```bash
+# LiveKit Configuration
+LIVEKIT_URL=wss://your-project.livekit.cloud
+LIVEKIT_API_KEY=your-api-key
+LIVEKIT_API_SECRET=your-api-secret
+
+# Agent Configuration
+USER_NAME=Student
+AGENT_NAME=StudyBuddy
+
+# AI Service Keys
+DEEPGRAM_API_KEY=your-deepgram-key
+OPENAI_API_KEY=your-openai-key
+ELEVEN_API_KEY=your-elevenlabs-key
+ELEVEN_VOICE_ID=your-voice-id
+
+# Optional: Alternative providers
+# CARTESIA_API_KEY=your-cartesia-key
+# ASSEMBLYAI_API_KEY=your-assemblyai-key
+```
 
 ## Frontend & Telephony
 
