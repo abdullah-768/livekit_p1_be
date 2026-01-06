@@ -203,3 +203,6 @@ ehthumbs.db
 
 # Build info and cache
 *.tsbuildinfo
+
+# Session summary reports (generated after each call)
+session-summary-*.md
