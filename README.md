@@ -98,32 +98,33 @@ This project uses the following services. Please obtain API keys and add them to
 
 ### Required Services
 
-| Service | Purpose | Environment Variables | Get Your Key |
-|---------|---------|----------------------|--------------|
-| **LiveKit Cloud** | Real-time infrastructure | `LIVEKIT_URL`<br>`LIVEKIT_API_KEY`<br>`LIVEKIT_API_SECRET` | [LiveKit Cloud](https://cloud.livekit.io/) |
-| **Deepgram** | Speech-to-Text (STT) | `DEEPGRAM_API_KEY` | [Get API Key](https://console.deepgram.com/signup) |
-| **OpenAI** | Large Language Model (LLM) | `OPENAI_API_KEY` | [Get API Key](https://platform.openai.com/api-keys) |
-| **ElevenLabs** | Text-to-Speech (TTS) | `ELEVEN_API_KEY`<br>`ELEVEN_VOICE_ID` | [Get API Key](https://elevenlabs.io/app/settings/api-keys) |
+| Service           | Purpose                    | Environment Variables                                      | Get Your Key                                               |
+| ----------------- | -------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------- |
+| **LiveKit Cloud** | Real-time infrastructure   | `LIVEKIT_URL`<br>`LIVEKIT_API_KEY`<br>`LIVEKIT_API_SECRET` | [LiveKit Cloud](https://cloud.livekit.io/)                 |
+| **Deepgram**      | Speech-to-Text (STT)       | `DEEPGRAM_API_KEY`                                         | [Get API Key](https://console.deepgram.com/signup)         |
+| **OpenAI**        | Large Language Model (LLM) | `OPENAI_API_KEY`                                           | [Get API Key](https://platform.openai.com/api-keys)        |
+| **ElevenLabs**    | Text-to-Speech (TTS)       | `ELEVEN_API_KEY`<br>`ELEVEN_VOICE_ID`                      | [Get API Key](https://elevenlabs.io/app/settings/api-keys) |
 
 ### Alternative TTS Options (Optional)
 
 You can also use these TTS providers instead of ElevenLabs:
 
-| Provider | Environment Variable | Get Your Key |
-|----------|---------------------|--------------|
-| **Cartesia** | `CARTESIA_API_KEY` | [Get API Key](https://play.cartesia.ai/keys) |
+| Provider     | Environment Variable | Get Your Key                                 |
+| ------------ | -------------------- | -------------------------------------------- |
+| **Cartesia** | `CARTESIA_API_KEY`   | [Get API Key](https://play.cartesia.ai/keys) |
 
 ### Alternative STT Options (Optional)
 
 You can also use AssemblyAI for speech-to-text:
 
-| Provider | Environment Variable | Get Your Key |
-|----------|---------------------|--------------|
+| Provider       | Environment Variable | Get Your Key                                                 |
+| -------------- | -------------------- | ------------------------------------------------------------ |
 | **AssemblyAI** | `ASSEMBLYAI_API_KEY` | [Get API Key](https://www.assemblyai.com/dashboard/api-keys) |
 
 ### Configuration Notes
 
 **Agent Customization:**
+
 - `USER_NAME`: The name of the student (default: "Student")
 - `AGENT_NAME`: The name of your AI study buddy (default: "StudyBuddy")
 

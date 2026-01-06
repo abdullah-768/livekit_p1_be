@@ -282,7 +282,7 @@ You are ${agentName}, a friendly seventh-grade student at the Veritas Learning C
             // Reset lastShownTopic so images can be shown again
             this.lastShownTopic = null;
 
-            return "Image closed successfully.";
+            return 'Image closed successfully.';
           },
         }),
 
@@ -309,7 +309,8 @@ You are ${agentName}, a friendly seventh-grade student at the Veritas Learning C
         }),
 
         recordTopicCovered: llm.tool({
-          description: 'Track topics covered during the session (e.g., plant cells, animal cells, mitochondria)',
+          description:
+            'Track topics covered during the session (e.g., plant cells, animal cells, mitochondria)',
           parameters: z.object({
             topic: z.string().describe('The topic that was just covered'),
           }),
@@ -474,7 +475,10 @@ You are ${agentName}, a friendly seventh-grade student at the Veritas Learning C
 
     summary += `## Recommendations\n`;
     summary += `- Review the topics covered above\n`;
-    if (this.sessionData.quizScore && this.sessionData.quizScore.correct < this.sessionData.quizScore.total) {
+    if (
+      this.sessionData.quizScore &&
+      this.sessionData.quizScore.correct < this.sessionData.quizScore.total
+    ) {
       summary += `- Practice quiz questions on areas where you struggled\n`;
     }
     summary += `- Continue studying cells and their functions\n`;
